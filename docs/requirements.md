@@ -23,7 +23,7 @@ upload a document and ask an AI chat bot about it
    digital `pdf`s
 3. The system shall state if the AI can't find an answer inside the document
 4. The system shall validate if the provided file is a `pdf` file
-5. The system shall display progress state during `pdf` upload and ai
+5. The system shall display progress state during `pdf` upload and AI
    processing
 6. The system shall support documents with a configurable maximum number of
    pages
@@ -50,13 +50,12 @@ upload a document and ask an AI chat bot about it
 #### Must Have
 
 1. The system shall have responsive UI
-2. The system shall allow all interactive elements shall be accessible via
-   keyboard
+2. The system shall allow all interactive elements to be accessible via keyboard
 3. The system shall convey errors through text messages, not color alone
 
 ### NFR-03 Performance
 
 #### Must Have
 
-1. The system shall have a configurable maximum `pdf` size
+1. The system shall have a configurable maximum `pdf` file size
 2. The user submitted question shall have a configurable maximum character limit
