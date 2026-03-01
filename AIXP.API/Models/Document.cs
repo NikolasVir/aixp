@@ -13,6 +13,8 @@ public record Document
     // Chunks: a Chunk is a portion of text
     public List<string> Chunks { get; set; }
 
+    // Parallel to Chunks - Embeddings[i] is the embedding vector for Chunks[i]
+    public List<float[]> Embeddings { get; set; } = new();
 
     public int PageCount => PageTexts.Count;
     public int ChunkCount => Chunks.Count;

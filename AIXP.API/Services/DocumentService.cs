@@ -3,10 +3,17 @@ namespace AIXP.API.Services;
 public class DocumentService
 {
     private readonly Dictionary<Guid, Document> _documents = new();
+    private readonly EmbeddingService _embeddingService;
 
-    public Document CreateDocument(IFormFile file)
+    public DocumentService(EmbeddingService embeddingService)
+    {
+        _embeddingService = embeddingService;
+    }
+
+    public async Task<Document> CreateDocumentAsync(IFormFile file)
     {
         var document = new Document(file);
+        document.Embeddings = await _embeddingService.EmbedAllAsync(document.Chunks);
         _documents.Add(document.Id, document);
         return document;
     }

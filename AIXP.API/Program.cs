@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddHttpClient<EmbeddingService>();
 builder.Services.AddSingleton<DocumentService>();
 
 var app = builder.Build();
@@ -29,14 +30,15 @@ app.MapPost("/document", async Task<IResult> (HttpContext context, DocumentServi
     if (!file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
         return TypedResults.BadRequest("Only PDF files allowed");
 
-    // Use service to create document
-    var document = documentService.CreateDocument(file);
+    var document = await documentService.CreateDocumentAsync(file);
 
     return TypedResults.Created($"/document/{document.Id}", new
     {
         id = document.Id,
         name = document.Name,
         pageCount = document.PageCount,
+        chunkCount = document.ChunkCount,
+        embeddingCount = document.Embeddings.Count,
         uploadedAt = document.TimeUploaded
     });
 })
