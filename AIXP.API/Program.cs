@@ -22,16 +22,16 @@ app.MapPost("/document", async Task<IResult> (HttpContext context, DocumentServi
 {
     var form = await context.Request.ReadFormAsync();
     var file = form.Files["file"];
-    
+
     if (file == null || file.Length == 0)
         return TypedResults.BadRequest("No file uploaded");
-    
+
     if (!file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
         return TypedResults.BadRequest("Only PDF files allowed");
-    
+
     // Use service to create document
     var document = documentService.CreateDocument(file);
-    
+
     return TypedResults.Created($"/document/{document.Id}", new
     {
         id = document.Id,
@@ -46,10 +46,10 @@ app.MapPost("/document", async Task<IResult> (HttpContext context, DocumentServi
 app.MapGet("/document/{id:guid}", (Guid id, DocumentService documentService) =>
 {
     var document = documentService.GetDocument(id);
-    
+
     if (document == null)
         return Results.NotFound($"Document with ID {id} not found");
-    
+
     return Results.Ok(new
     {
         id = document.Id,
@@ -65,7 +65,7 @@ app.MapGet("/document/{id:guid}", (Guid id, DocumentService documentService) =>
 app.MapGet("/documents", (DocumentService documentService) =>
 {
     var documents = documentService.GetAllDocuments();
-    
+
     return Results.Ok(documents.Select(d => new
     {
         id = d.Id,
@@ -81,12 +81,12 @@ app.MapGet("/documents", (DocumentService documentService) =>
 app.MapDelete("/document/{id:guid}", (Guid id, DocumentService documentService) =>
 {
     var document = documentService.GetDocument(id);
-    
+
     if (document == null)
         return Results.NotFound($"Document with ID {id} not found");
-    
+
     documentService.RemoveDocument(id);
-    
+
     return Results.NoContent();  // 204 No Content (success, no body)
 })
 .WithName("DeleteDocumentById");
