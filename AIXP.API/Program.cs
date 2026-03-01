@@ -40,8 +40,7 @@ app.MapPost("/document", async Task<IResult> (HttpContext context, DocumentServi
         uploadedAt = document.TimeUploaded
     });
 })
-.WithName("CreateDocument")
-.DisableAntiforgery();
+.WithName("CreateDocument");
 
 // GET single document by ID
 app.MapGet("/document/{id:guid}", (Guid id, DocumentService documentService) =>
