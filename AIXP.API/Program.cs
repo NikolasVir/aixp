@@ -97,7 +97,7 @@ app.MapGet("/document/{id:guid}/pages", (Guid id, DocumentService documentServic
         })
     });
 })
-.WithName("GetDocumentPageTexts");
+.WithName("GetDocumentPageTextsById");
 
 // DELETE document by ID
 app.MapDelete("/document/{id:guid}", (Guid id, DocumentService documentService) =>
