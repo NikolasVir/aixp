@@ -30,7 +30,8 @@ public record Document
 
         foreach (var page in pdf.GetPages())
         {
-            pages.Add(page.Text);
+            var text = string.Join(" ", page.GetWords().Select(w => w.Text));
+            pages.Add(text);
         }
 
         return pages;
