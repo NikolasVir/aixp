@@ -99,6 +99,28 @@ app.MapGet("/document/{id:guid}/pages", (Guid id, DocumentService documentServic
 })
 .WithName("GetDocumentPageTextsById");
 
+app.MapGet("/document/{id:guid}/chunks", (Guid id, DocumentService documentService) =>
+{
+    var document = documentService.GetDocument(id);
+
+    if (document == null)
+        return Results.NotFound($"Document with ID {id} not found");
+
+    return Results.Ok(new
+    {
+        id = document.Id,
+        name = document.Name,
+        chunkCount = document.ChunkCount,
+        chunks = document.Chunks.Select((text, index) => new
+        {
+            chunkNumber = index + 1,
+            wordCount = text.Split(' ').Length,
+            text
+        })
+    });
+})
+.WithName("GetDocumentChunksById");
+
 // DELETE document by ID
 app.MapDelete("/document/{id:guid}", (Guid id, DocumentService documentService) =>
 {
