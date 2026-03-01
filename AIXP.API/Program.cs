@@ -77,6 +77,28 @@ app.MapGet("/documents", (DocumentService documentService) =>
 })
 .WithName("GetAllDocuments");
 
+// GET page texts for a document
+app.MapGet("/document/{id:guid}/pages", (Guid id, DocumentService documentService) =>
+{
+    var document = documentService.GetDocument(id);
+
+    if (document == null)
+        return Results.NotFound($"Document with ID {id} not found");
+
+    return Results.Ok(new
+    {
+        id = document.Id,
+        name = document.Name,
+        pageCount = document.PageCount,
+        pages = document.PageTexts.Select((text, index) => new
+        {
+            pageNumber = index + 1,
+            text
+        })
+    });
+})
+.WithName("GetDocumentPageTexts");
+
 // DELETE document by ID
 app.MapDelete("/document/{id:guid}", (Guid id, DocumentService documentService) =>
 {
