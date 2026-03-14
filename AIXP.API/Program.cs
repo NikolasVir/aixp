@@ -8,6 +8,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddHttpClient<EmbeddingService>();
 builder.Services.AddSingleton<DocumentService>();
 builder.Services.AddSingleton<SearchService>();
+builder.Services.AddHttpClient<GenerationService>();
 
 var app = builder.Build();
 
@@ -157,6 +158,45 @@ app.MapPost("/document/{id:guid}/search", async Task<IResult> (
 })
 .WithName("SearchDocument");
 
+// POST ask a question about a document
+app.MapPost("/document/{id:guid}/ask", async Task<IResult> (
+    Guid id,
+    AskRequest request,
+    DocumentService documentService,
+    EmbeddingService embeddingService,
+    SearchService searchService,
+    GenerationService generationService) =>
+{
+    var document = documentService.GetDocument(id);
+
+    if (document == null)
+        return Results.NotFound($"Document with ID {id} not found");
+
+    if (string.IsNullOrWhiteSpace(request.Question))
+        return Results.BadRequest("Question cannot be empty");
+
+    // Step 1: Embed the question
+    var queryEmbedding = await embeddingService.EmbedAsync(request.Question);
+
+    // Step 2: Find relevant chunks
+    var searchResults = searchService.Search(document, queryEmbedding, request.TopN);
+
+    // Step 3: Generate answer
+    var contextChunks = searchResults.Select(r => r.Text).ToList();
+    var answer = await generationService.AskAsync(request.Question, contextChunks);
+
+    return Results.Ok(new
+    {
+        question = request.Question,
+        answer,
+        sourceChunks = searchResults.Select(r => new
+        {
+            chunkNumber = r.ChunkNumber,
+            score = Math.Round(r.Score, 4)
+        })
+    });
+})
+.WithName("AskDocument");
 
 // DELETE document by ID
 app.MapDelete("/document/{id:guid}", (Guid id, DocumentService documentService) =>
