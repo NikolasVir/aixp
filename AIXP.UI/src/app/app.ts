@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from './services/api.service';
 
@@ -10,6 +10,7 @@ import { ApiService } from './services/api.service';
 })
 export class App {
   private api = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
 
   // Document state
   documentId: string | null = null;
@@ -43,10 +44,12 @@ export class App {
         this.pageCount = response.pageCount;
         this.chunkCount = response.chunkCount;
         this.uploading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.error = 'Failed to upload document. Is the API running?';
         this.uploading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -64,10 +67,12 @@ export class App {
         this.answer = response.answer;
         this.sourceChunks = response.sourceChunks.map((c: any) => c.chunkNumber);
         this.asking = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.error = 'Failed to get answer. Is the API running?';
         this.asking = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -81,5 +86,6 @@ export class App {
     this.answer = '';
     this.sourceChunks = [];
     this.error = '';
+    this.cdr.detectChanges();
   }
 }
