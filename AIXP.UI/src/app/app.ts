@@ -69,8 +69,8 @@ export class App {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.error = 'Failed to get answer. Is the API running?';
-        this.asking = false;
+        this.error = err.error ?? 'Failed to upload document. Is the API running?';
+        this.uploading = false;
         this.cdr.detectChanges();
       },
     });
