@@ -9,8 +9,18 @@ builder.Services.AddHttpClient<EmbeddingService>();
 builder.Services.AddSingleton<DocumentService>();
 builder.Services.AddSingleton<SearchService>();
 builder.Services.AddHttpClient<GenerationService>();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
+app.UseCors();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

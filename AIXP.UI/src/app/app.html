@@ -1,0 +1,90 @@
+<div class="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-start p-8">
+  <!-- Header -->
+  <div class="w-full max-w-2xl mb-8">
+    <h1 class="text-3xl font-bold text-white">AIXP</h1>
+    <p class="text-gray-400 text-sm mt-1">Ask questions about your PDF documents</p>
+  </div>
+
+  <!-- Upload Section -->
+  <div class="w-full max-w-2xl bg-gray-900 rounded-xl p-6 mb-4">
+    <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Document</h2>
+
+    @if (!documentId) {
+      <!-- Upload State -->
+      <label
+        class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-blue-500 transition-colors"
+      >
+        <span class="text-gray-400 text-sm">{{
+          uploading ? 'Uploading...' : 'Click to upload PDF'
+        }}</span>
+        <input
+          type="file"
+          accept=".pdf"
+          class="hidden"
+          (change)="onFileSelected($event)"
+          [disabled]="uploading"
+        />
+      </label>
+    } @else {
+      <!-- Uploaded State -->
+      <div class="flex items-center justify-between bg-gray-800 rounded-lg px-4 py-3">
+        <div>
+          <p class="text-white font-medium">{{ documentName }}</p>
+          <p class="text-gray-400 text-xs mt-0.5">
+            {{ pageCount }} pages · {{ chunkCount }} chunks
+          </p>
+        </div>
+        <button
+          (click)="reset()"
+          class="text-gray-500 hover:text-red-400 text-sm transition-colors"
+        >
+          Remove
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Question Section -->
+  @if (documentId) {
+    <div class="w-full max-w-2xl bg-gray-900 rounded-xl p-6 mb-4">
+      <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Question</h2>
+      <div class="flex gap-2">
+        <input
+          type="text"
+          [(ngModel)]="question"
+          (keyup.enter)="askQuestion()"
+          placeholder="Ask something about the document..."
+          class="flex-1 bg-gray-800 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+          [disabled]="asking"
+        />
+        <button
+          (click)="askQuestion()"
+          [disabled]="asking || !question.trim()"
+          class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+        >
+          {{ asking ? 'Thinking...' : 'Ask' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Answer Section -->
+  @if (answer) {
+    <div class="w-full max-w-2xl bg-gray-900 rounded-xl p-6">
+      <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Answer</h2>
+      <p class="text-white text-sm leading-relaxed whitespace-pre-wrap">{{ answer }}</p>
+      @if (sourceChunks.length > 0) {
+        <div class="mt-4 pt-4 border-t border-gray-800">
+          <p class="text-gray-500 text-xs">Sources: chunks {{ sourceChunks.join(', ') }}</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error) {
+    <div class="w-full max-w-2xl mt-4 bg-red-900/30 border border-red-700 rounded-xl p-4">
+      <p class="text-red-400 text-sm">{{ error }}</p>
+    </div>
+  }
+</div>
