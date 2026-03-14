@@ -1,27 +1,30 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
 
 namespace AIXP.API.Services;
 
 public class EmbeddingService
 {
     private readonly HttpClient _httpClient;
-    private const string OllamaUrl = "http://localhost:11434/api/embeddings";
-    private const string Model = "bge-m3";
+    private readonly string _ollamaUrl;
+    private readonly string _model;
 
-    public EmbeddingService(HttpClient httpClient)
+    public EmbeddingService(HttpClient httpClient, IOptions<OllamaSettings> options)
     {
         _httpClient = httpClient;
+        _ollamaUrl = $"{options.Value.BaseUrl}/api/embeddings";
+        _model = options.Value.EmbeddingModel;
     }
 
     public async Task<float[]> EmbedAsync(string text)
     {
-        var payload = new { model = Model, prompt = text };
+        var payload = new { model = _model, prompt = text };
         var json = JsonSerializer.Serialize(payload);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync(OllamaUrl, content);
+        var response = await _httpClient.PostAsync(_ollamaUrl, content);
         response.EnsureSuccessStatusCode();
 
         var responseJson = await response.Content.ReadAsStringAsync();
@@ -46,5 +49,4 @@ public class EmbeddingService
     private record OllamaEmbeddingResponse(
         [property: JsonPropertyName("embedding")] float[] embedding
     );
-
 }

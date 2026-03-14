@@ -1,18 +1,21 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
 
 namespace AIXP.API.Services;
 
 public class GenerationService
 {
     private readonly HttpClient _httpClient;
-    private const string OllamaUrl = "http://localhost:11434/api/chat";
-    private const string Model = "llama3.2";
+    private readonly string _ollamaUrl;
+    private readonly string _model;
 
-    public GenerationService(HttpClient httpClient)
+    public GenerationService(HttpClient httpClient, IOptions<OllamaSettings> options)
     {
         _httpClient = httpClient;
+        _ollamaUrl = $"{options.Value.BaseUrl}/api/chat";
+        _model = options.Value.Model;
     }
 
     public async Task<string> AskAsync(string question, List<string> contextChunks)
@@ -33,11 +36,11 @@ public class GenerationService
             }
         };
 
-        var payload = new { model = Model, messages, stream = false };
+        var payload = new { model = _model, messages, stream = false };
         var json = JsonSerializer.Serialize(payload);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync(OllamaUrl, content);
+        var response = await _httpClient.PostAsync(_ollamaUrl, content);
         response.EnsureSuccessStatusCode();
 
         var responseJson = await response.Content.ReadAsStringAsync();

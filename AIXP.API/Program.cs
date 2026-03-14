@@ -6,13 +6,24 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddHttpClient<EmbeddingService>();
-builder.Services.AddSingleton<DocumentService>();
+
+// Add Configuration Services
 builder.Services.Configure<DocumentSettings>(
     builder.Configuration.GetSection("DocumentSettings")
 );
-builder.Services.AddSingleton<SearchService>();
+builder.Services.Configure<OllamaSettings>(
+    builder.Configuration.GetSection("OllamaSettings")
+);
+
+// Add HttpClient Services
+builder.Services.AddHttpClient<EmbeddingService>();
 builder.Services.AddHttpClient<GenerationService>();
+
+// Add Singleton Services
+builder.Services.AddSingleton<DocumentService>();
+builder.Services.AddSingleton<SearchService>();
+
+// Add Cors Service
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
