@@ -40,6 +40,11 @@ AIXP is a small personal AI assistant proof-of-concept with a .NET Core backend 
 - `AIXP.API/Services/GenerationService.cs` currently calls Ollama with model `llama3.2`.
 - If no answer exists in context, the service prompt is designed to say so.
 
+## Docker
+
+Docker Compose and Dockerfile are included. Running `docker compose up` will
+automatically pull the required Ollama models and start all services.
+
 ## Development
 
 - Add models in `AIXP.API/Models`
