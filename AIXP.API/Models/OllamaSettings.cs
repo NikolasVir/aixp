@@ -1,5 +1,3 @@
-namespace AIXP.API.Services;
-
 public class OllamaSettings
 {
     public string BaseUrl { get; set; } = "http://localhost:11434";
