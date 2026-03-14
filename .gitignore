@@ -45,6 +45,4 @@ msbuild.wrn
 
 # Node.js build artifacts
 node_modules/
-package-lock.json
-package.json
 .fake
