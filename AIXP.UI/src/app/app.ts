@@ -31,7 +31,6 @@ export class App {
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-
     if (!file) return;
 
     this.uploading = true;
@@ -47,7 +46,7 @@ export class App {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.error = 'Failed to upload document. Is the API running?';
+        this.error = err.error ?? 'Failed to upload document. Is the API running?';
         this.uploading = false;
         this.cdr.detectChanges();
       },
