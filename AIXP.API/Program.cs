@@ -1,4 +1,5 @@
 using AIXP.API.Services;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient<EmbeddingService>();
 builder.Services.AddSingleton<DocumentService>();
+builder.Services.Configure<DocumentSettings>(
+    builder.Configuration.GetSection("DocumentSettings")
+);
 builder.Services.AddSingleton<SearchService>();
 builder.Services.AddHttpClient<GenerationService>();
 builder.Services.AddCors(options =>
@@ -30,8 +34,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Create a document
-app.MapPost("/document", async Task<IResult> (HttpContext context, DocumentService documentService) =>
+app.MapPost("/document", async Task<IResult> (
+    HttpContext context,
+    DocumentService documentService,
+    IOptions<DocumentSettings> settings) =>
 {
     var form = await context.Request.ReadFormAsync();
     var file = form.Files["file"];
@@ -40,7 +46,10 @@ app.MapPost("/document", async Task<IResult> (HttpContext context, DocumentServi
         return TypedResults.BadRequest("No file uploaded");
 
     if (!file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
-        return TypedResults.BadRequest("Only PDF files allowed");
+        return TypedResults.BadRequest("Only PDF files are allowed");
+
+    if (file.Length > settings.Value.MaxFileSizeBytes)
+        return TypedResults.BadRequest($"File exceeds maximum allowed size of {settings.Value.MaxFileSizeBytes / 1024 / 1024}MB");
 
     var document = await documentService.CreateDocumentAsync(file);
 
@@ -55,6 +64,7 @@ app.MapPost("/document", async Task<IResult> (HttpContext context, DocumentServi
     });
 })
 .WithName("CreateDocument");
+
 
 // GET single document by ID
 app.MapGet("/document/{id:guid}", (Guid id, DocumentService documentService) =>
