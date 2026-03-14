@@ -185,7 +185,8 @@ app.MapPost("/document/{id:guid}/ask", async Task<IResult> (
     DocumentService documentService,
     EmbeddingService embeddingService,
     SearchService searchService,
-    GenerationService generationService) =>
+    GenerationService generationService,
+    IOptions<DocumentSettings> settings) =>
 {
     var document = documentService.GetDocument(id);
 
@@ -194,6 +195,9 @@ app.MapPost("/document/{id:guid}/ask", async Task<IResult> (
 
     if (string.IsNullOrWhiteSpace(request.Question))
         return Results.BadRequest("Question cannot be empty");
+
+    if (request.Question.Length > settings.Value.MaxQuestionLength)
+        return Results.BadRequest($"Question exceeds maximum length of {settings.Value.MaxQuestionLength} characters");
 
     // Step 1: Embed the question
     var queryEmbedding = await embeddingService.EmbedAsync(request.Question);
