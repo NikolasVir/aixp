@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient<EmbeddingService>();
 builder.Services.AddSingleton<DocumentService>();
+builder.Services.AddSingleton<SearchService>();
 
 var app = builder.Build();
 
@@ -101,6 +102,7 @@ app.MapGet("/document/{id:guid}/pages", (Guid id, DocumentService documentServic
 })
 .WithName("GetDocumentPageTextsById");
 
+// GET Document Chunks
 app.MapGet("/document/{id:guid}/chunks", (Guid id, DocumentService documentService) =>
 {
     var document = documentService.GetDocument(id);
@@ -122,6 +124,39 @@ app.MapGet("/document/{id:guid}/chunks", (Guid id, DocumentService documentServi
     });
 })
 .WithName("GetDocumentChunksById");
+
+// POST search within a document
+app.MapPost("/document/{id:guid}/search", async Task<IResult> (
+    Guid id,
+    SearchRequest request,
+    DocumentService documentService,
+    EmbeddingService embeddingService,
+    SearchService searchService) =>
+{
+    var document = documentService.GetDocument(id);
+
+    if (document == null)
+        return Results.NotFound($"Document with ID {id} not found");
+
+    if (string.IsNullOrWhiteSpace(request.Query))
+        return Results.BadRequest("Query cannot be empty");
+
+    var queryEmbedding = await embeddingService.EmbedAsync(request.Query);
+    var results = searchService.Search(document, queryEmbedding, request.TopN);
+
+    return Results.Ok(new
+    {
+        query = request.Query,
+        results = results.Select(r => new
+        {
+            chunkNumber = r.ChunkNumber,
+            score = Math.Round(r.Score, 4),
+            text = r.Text
+        })
+    });
+})
+.WithName("SearchDocument");
+
 
 // DELETE document by ID
 app.MapDelete("/document/{id:guid}", (Guid id, DocumentService documentService) =>
